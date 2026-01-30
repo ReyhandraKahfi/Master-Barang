@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistik Barang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="analytic.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Menu Button di kiri atas -->
+    <div class="menu-button">
+        <button id="menuToggle">
+            <i class="fas fa-bars"></i> Menu
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="index.html">
+                <i class="fas fa-boxes"></i> Master Barang
+            </a>
+            <a href="analytic.html" class="active">
+                <i class="fas fa-chart-bar"></i> Statistik Barang
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-bar"></i> Statistik Barang</h1>
+        </header>
+        
+        <div class="analytic-container">
+            <!-- Statistik Ringkasan -->
+            <div class="summary-cards">
+                <div class="card">
+                    <div class="card-icon" style="background-color: #3498db;">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Total Barang</h3>
+                        <p id="totalBarang">0</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon" style="background-color: #2ecc71;">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Total Stock</h3>
+                        <p id="totalStock">0</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon" style="background-color: #e74c3c;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Barang Minimum</h3>
+                        <p id="barangMinimum">0</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-icon" style="background-color: #f39c12;">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Total Nilai</h3>
+                        <p id="totalNilai">Rp 0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grafik dan Tabel -->
+            <div class="analytic-content">
+                <div class="chart-section">
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-pie"></i> Distribusi Stock per Lokasi</h3>
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3><i class="fas fa-chart-bar"></i> 10 Barang dengan Stock Terbanyak</h3>
+                        <canvas id="topStockChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="table-section">
+                    <div class="table-container">
+                        <h3><i class="fas fa-list"></i> Barang dengan Stock Minimum</h3>
+                        <table id="minStockTable">
+                            <thead>
+                                <tr>
+                                    <th>Kode Barang</th>
+                                    <th>Nama Barang</th>
+                                    <th>Lokasi</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="minStockBody">
+                                <!-- Data akan dimuat di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="table-container">
+                        <h3><i class="fas fa-star"></i> Barang dengan Nilai Tertinggi</h3>
+                        <table id="highValueTable">
+                            <thead>
+                                <tr>
+                                    <th>Kode Barang</th>
+                                    <th>Nama Barang</th>
+                                    <th>Stock</th>
+                                    <th>Harga Beli</th>
+                                    <th>Total Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody id="highValueBody">
+                                <!-- Data akan dimuat di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filter dan Kontrol -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="filterLokasi">Filter Berdasarkan Lokasi:</label>
+                        <select id="filterLokasi">
+                            <option value="">Semua Lokasi</option>
+                            <!-- Opsi lokasi akan diisi oleh JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="filterSatuan">Filter Berdasarkan Satuan:</label>
+                        <select id="filterSatuan">
+                            <option value="">Semua Satuan</option>
+                            <!-- Opsi satuan akan diisi oleh JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <button class="btn btn-filter" id="btnApplyFilter">
+                            <i class="fas fa-filter"></i> Terapkan Filter
+                        </button>
+                        <button class="btn btn-reset" id="btnResetFilter">
+                            <i class="fas fa-redo"></i> Reset Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="analytic.js"></script>
+</body>
+</html>
