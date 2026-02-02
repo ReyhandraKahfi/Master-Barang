@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kartu Hutang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="menu-button">
+        <button id="menuToggle">
+            <i class="fas fa-bars"></i> Menu
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="index.html">
+                <i class="fas fa-boxes"></i> Master Barang
+            </a>
+            <a href="supplier.html">
+                <i class="fas fa-truck"></i> Master Supplier
+            </a>
+            <a href="transaksi.html">
+                <i class="fas fa-exchange-alt"></i> Transaksi
+            </a>
+            <a href="kartu-hutang.html" class="active">
+                <i class="fas fa-file-invoice-dollar"></i> Kartu Hutang
+            </a>
+            <a href="rekap-hutang.html">
+                <i class="fas fa-chart-pie"></i> Rekap Hutang
+            </a>
+            <a href="analytic.html">
+                <i class="fas fa-chart-bar"></i> Statistik Barang
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-file-invoice-dollar"></i> Kartu Hutang</h1>
+        </header>
+        
+        <div class="filter-section">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="filterSupplier">Pilih Supplier</label>
+                    <select id="filterSupplier">
+                        <option value="">Semua Supplier</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Periode Awal</label>
+                    <input type="date" id="startDate" value="">
+                </div>
+                <div class="form-group">
+                    <label for="endDate">Periode Akhir</label>
+                    <input type="date" id="endDate" value="">
+                </div>
+                <div class="form-group">
+                    <label style="visibility: hidden;">Filter</label>
+                    <button class="btn btn-filter" id="btnFilter">
+                        <i class="fas fa-filter"></i> Tampilkan
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="excel-style-container" id="excelContainer">
+            <!-- Kartu hutang akan ditampilkan di sini dengan format Excel -->
+            <!-- Hanya menampilkan kartu hutang per supplier, TANPA rekap -->
+        </div>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="kartu-hutang.js"></script>
+</body>
+</html>

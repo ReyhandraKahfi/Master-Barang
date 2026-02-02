@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaksi Pembelian</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="menu-button">
+        <button id="menuToggle">
+            <i class="fas fa-bars"></i> Menu
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="index.html">
+                <i class="fas fa-boxes"></i> Master Barang
+            </a>
+            <a href="supplier.html">
+                <i class="fas fa-truck"></i> Master Supplier
+            </a>
+            <a href="transaksi.html" class="active">
+                <i class="fas fa-exchange-alt"></i> Transaksi
+            </a>
+            <a href="kartu-hutang.html">
+                <i class="fas fa-file-invoice-dollar"></i> Kartu Hutang
+            </a>
+            <a href="rekap-hutang.html">
+                <i class="fas fa-chart-pie"></i> Rekap Hutang
+            </a>
+            <a href="analytic.html">
+                <i class="fas fa-chart-bar"></i> Statistik Barang
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-exchange-alt"></i> Transaksi Pembelian</h1>
+        </header>
+        
+        <div class="form-container">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tanggal">Tanggal Transaksi</label>
+                    <input type="datetime-local" id="tanggal" value="">
+                </div>
+                <div class="form-group">
+                    <label for="supplier">Supplier</label>
+                    <select id="supplier">
+                        <option value="">Pilih Supplier</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="noFaktur">No. Faktur</label>
+                    <input type="text" id="noFaktur" placeholder="Masukkan nomor faktur">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="barang">Barang</label>
+                    <select id="barang">
+                        <option value="">Pilih Barang</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="qty">Quantity</label>
+                    <input type="number" id="qty" placeholder="Jumlah" min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="harga">Harga Satuan</label>
+                    <input type="text" id="harga" placeholder="Harga satuan" class="number-input">
+                </div>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn btn-tambah" id="btnTambahItem">
+                    <i class="fas fa-plus"></i> Tambah ke Daftar
+                </button>
+                <button class="btn btn-simpan" id="btnSimpanTransaksi">
+                    <i class="fas fa-save"></i> Simpan Transaksi
+                </button>
+                <button class="btn btn-reset" id="btnReset">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+            
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+        
+        <div class="table-container">
+            <h3>Detail Pembelian</h3>
+            <table id="tableTransaksi">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Barang</th>
+                        <th>Qty</th>
+                        <th>Harga</th>
+                        <th>DPP</th>
+                        <th>PPN (11%)</th>
+                        <th>Total</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableTransaksiBody"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" style="text-align: right; font-weight: bold;">Total:</td>
+                        <td id="totalDPP" class="total-cell">0</td>
+                        <td id="totalPPN" class="total-cell">0</td>
+                        <td id="grandTotal" class="total-cell">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <div class="summary-box">
+            <div class="summary-item">
+                <span>Supplier:</span>
+                <strong id="selectedSupplier">-</strong>
+            </div>
+            <div class="summary-item">
+                <span>Tanggal:</span>
+                <strong id="selectedTanggal">-</strong>
+            </div>
+            <div class="summary-item">
+                <span>Grand Total:</span>
+                <strong id="displayGrandTotal">Rp 0</strong>
+            </div>
+        </div>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="transaksi.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Hutang Dagang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="menu-button">
+        <button id="menuToggle">
+            <i class="fas fa-bars"></i> Menu
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="index.html">
+                <i class="fas fa-boxes"></i> Master Barang
+            </a>
+            <a href="supplier.html">
+                <i class="fas fa-truck"></i> Master Supplier
+            </a>
+            <a href="transaksi.html">
+                <i class="fas fa-exchange-alt"></i> Transaksi
+            </a>
+            <a href="kartu-hutang.html">
+                <i class="fas fa-file-invoice-dollar"></i> Kartu Hutang
+            </a>
+            <a href="rekap-hutang.html" class="active">
+                <i class="fas fa-chart-pie"></i> Rekap Hutang
+            </a>
+            <a href="analytic.html">
+                <i class="fas fa-chart-bar"></i> Statistik Barang
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-chart-pie"></i> Rekap Hutang Dagang</h1>
+        </header>
+        
+        <div class="filter-section">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rekapDate">Tanggal Rekap</label>
+                    <input type="date" id="rekapDate" value="">
+                </div>
+                <div class="form-group">
+                    <label style="visibility: hidden;">Generate</label>
+                    <button class="btn btn-generate" id="btnGenerate">
+                        <i class="fas fa-sync-alt"></i> Generate Rekap
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-icon" style="background-color: #3498db;">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Total Supplier</h3>
+                    <p id="totalSupplier">0</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon" style="background-color: #e74c3c;">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Total Hutang</h3>
+                    <p id="totalHutang">Rp 0</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon" style="background-color: #f39c12;">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Transaksi Bulan Ini</h3>
+                    <p id="totalTransaksi">0</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon" style="background-color: #2ecc71;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Lunas Bulan Ini</h3>
+                    <p id="totalLunas">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Container untuk Rekap Hutang Excel-like -->
+        <div class="excel-style-container" id="excelContainer">
+            <!-- Rekap hutang akan ditampilkan di sini dengan format Excel -->
+        </div>
+        
+        <!-- Export Section -->
+        <div class="export-section">
+            <button class="btn btn-export" id="btnExportExcel">
+                <i class="fas fa-file-excel"></i> Export ke Excel
+            </button>
+            <button class="btn btn-print" id="btnPrint">
+                <i class="fas fa-print"></i> Cetak Laporan
+            </button>
+        </div>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="rekap-hutang.js"></script>
+</body>
+</html>

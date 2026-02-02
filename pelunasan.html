@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelunasan Hutang</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="menu-button">
+        <button id="menuToggle">
+            <i class="fas fa-bars"></i> Menu
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="index.html">
+                <i class="fas fa-boxes"></i> Master Barang
+            </a>
+            <a href="supplier.html">
+                <i class="fas fa-truck"></i> Master Supplier
+            </a>
+            <a href="transaksi.html">
+                <i class="fas fa-exchange-alt"></i> Transaksi
+            </a>
+            <a href="pelunasan.html" class="active">
+                <i class="fas fa-money-check-alt"></i> Pelunasan
+            </a>
+            <a href="kartu-hutang.html">
+                <i class="fas fa-file-invoice-dollar"></i> Kartu Hutang
+            </a>
+            <a href="rekap-hutang.html">
+                <i class="fas fa-chart-pie"></i> Rekap Hutang
+            </a>
+            <a href="analytic.html">
+                <i class="fas fa-chart-bar"></i> Statistik Barang
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-money-check-alt"></i> Pelunasan Hutang</h1>
+        </header>
+        
+        <div class="form-container">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tanggalPelunasan">Tanggal Pelunasan</label>
+                    <input type="datetime-local" id="tanggalPelunasan" value="">
+                </div>
+                <div class="form-group">
+                    <label for="supplierPelunasan">Supplier</label>
+                    <select id="supplierPelunasan">
+                        <option value="">Pilih Supplier</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="jumlahPelunasan">Jumlah Pelunasan</label>
+                    <input type="text" id="jumlahPelunasan" placeholder="Masukkan jumlah" class="number-input">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="keterangan">Keterangan</label>
+                    <input type="text" id="keterangan" placeholder="Misal: Transfer, Tunai, dll">
+                </div>
+                <div class="form-group">
+                    <label for="buktiPelunasan">No. Bukti</label>
+                    <input type="text" id="buktiPelunasan" placeholder="No. Bukti Pembayaran">
+                </div>
+            </div>
+            
+            <div class="btn-container">
+                <button class="btn btn-simpan" id="btnSimpanPelunasan">
+                    <i class="fas fa-save"></i> Simpan Pelunasan
+                </button>
+                <button class="btn btn-reset" id="btnResetPelunasan">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+            
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+        
+        <div class="table-container">
+            <h3>Riwayat Pelunasan</h3>
+            <table id="tablePelunasan">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Supplier</th>
+                        <th>Jumlah</th>
+                        <th>Keterangan</th>
+                        <th>No. Bukti</th>
+                    </tr>
+                </thead>
+                <tbody id="tablePelunasanBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="menu.js"></script>
+    <script src="pelunasan.js"></script>
+</body>
+</html>

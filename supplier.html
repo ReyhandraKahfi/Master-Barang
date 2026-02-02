@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Barang</title>
+    <title>Master Supplier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -15,10 +15,10 @@
             <i class="fas fa-bars"></i> Menu
         </button>
         <div class="dropdown-menu" id="dropdownMenu">
-            <a href="index.html" class="active">
+            <a href="index.html">
                 <i class="fas fa-boxes"></i> Master Barang
             </a>
-            <a href="supplier.html">
+            <a href="supplier.html" class="active">
                 <i class="fas fa-truck"></i> Master Supplier
             </a>
             <a href="transaksi.html">
@@ -38,54 +38,54 @@
 
     <div class="container">
         <header>
-            <h1><i class="fas fa-boxes"></i> Master Barang</h1>
+            <h1><i class="fas fa-truck"></i> Master Supplier</h1>
         </header>
         
         <div class="form-container">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="kodeBarang">Kode Barang</label>
-                    <input type="text" id="kodeBarang" placeholder="Masukkan kode barang">
+                    <label for="kodeSupplier">Kode Supplier</label>
+                    <input type="text" id="kodeSupplier" placeholder="Masukkan kode supplier">
                 </div>
                 <div class="form-group">
-                    <label for="namaBarang">Nama Barang</label>
-                    <input type="text" id="namaBarang" placeholder="Masukkan nama barang">
+                    <label for="namaSupplier">Nama Supplier</label>
+                    <input type="text" id="namaSupplier" placeholder="Masukkan nama supplier">
                 </div>
                 <div class="form-group">
-                    <label for="lokasi">Lokasi</label>
-                    <input type="text" id="lokasi" placeholder="Masukkan lokasi">
+                    <label for="telepon">Telepon</label>
+                    <input type="text" id="telepon" placeholder="Masukkan nomor telepon">
                 </div>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="stock">Stock</label>
-                    <input type="text" id="stock" placeholder="Masukkan jumlah stock" class="number-input">
+                    <label for="alamat">Alamat</label>
+                    <input type="text" id="alamat" placeholder="Masukkan alamat lengkap">
                 </div>
                 <div class="form-group">
-                    <label for="satuan">Satuan</label>
-                    <input type="text" id="satuan" placeholder="Misal: pcs, kg, dll">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Masukkan email">
                 </div>
                 <div class="form-group">
-                    <label for="hargaBeli">Harga Beli</label>
-                    <input type="text" id="hargaBeli" placeholder="Masukkan harga beli" class="number-input">
+                    <label for="saldoAwal">Saldo Awal Hutang</label>
+                    <input type="text" id="saldoAwal" placeholder="Masukkan saldo awal" class="number-input">
                 </div>
             </div>
             
             <div class="btn-container">
                 <div class="btn-group-left">
-                    <button class="btn btn-tambah" id="btnTambah">
-                        <i class="fas fa-plus"></i> Tambah Barang
+                    <button class="btn btn-tambah" id="btnTambahSupplier">
+                        <i class="fas fa-plus"></i> Tambah Supplier
                     </button>
-                    <button class="btn btn-simpan" id="btnSimpan" disabled>
+                    <button class="btn btn-simpan" id="btnSimpanSupplier" disabled>
                         <i class="fas fa-save"></i> Simpan
                     </button>
                 </div>
                 <div class="btn-group-right">
-                    <button class="btn btn-edit" id="btnEdit" disabled>
+                    <button class="btn btn-edit" id="btnEditSupplier" disabled>
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-hapus" id="btnHapus" disabled>
+                    <button class="btn btn-hapus" id="btnHapusSupplier" disabled>
                         <i class="fas fa-trash"></i> Hapus
                     </button>
                 </div>
@@ -95,32 +95,32 @@
         </div>
         
         <div class="table-container">
-            <table id="tableBarang">
+            <table id="tableSupplier">
                 <thead>
                     <tr>
-                        <th>Kode Barang</th>
-                        <th>Nama Barang</th>
-                        <th>Lokasi</th>
-                        <th>Stock</th>
-                        <th>Satuan</th>
-                        <th>Harga Beli</th>
-                        <th>Total Nilai</th>
+                        <th>Kode Supplier</th>
+                        <th>Nama Supplier</th>
+                        <th>Telepon</th>
+                        <th>Alamat</th>
+                        <th>Email</th>
+                        <th>Saldo Awal</th>
+                        <th>Total Hutang</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody"></tbody>
+                <tbody id="tableSupplierBody"></tbody>
             </table>
         </div>
     </div>
     
-    <div class="modal" id="deleteModal">
+    <div class="modal" id="deleteModalSupplier">
         <div class="modal-content">
             <h3><i class="fas fa-exclamation-triangle"></i> Konfirmasi Hapus</h3>
-            <p>Apakah Anda yakin ingin menghapus barang ini?</p>
+            <p>Apakah Anda yakin ingin menghapus supplier ini?</p>
             <div class="modal-buttons">
-                <button class="btn btn-cancel" id="btnCancelDelete">
+                <button class="btn btn-cancel" id="btnCancelDeleteSupplier">
                     <i class="fas fa-times"></i> Batal
                 </button>
-                <button class="btn btn-confirm" id="btnConfirmDelete">
+                <button class="btn btn-confirm" id="btnConfirmDeleteSupplier">
                     <i class="fas fa-check"></i> Hapus
                 </button>
             </div>
@@ -128,6 +128,6 @@
     </div>
 
     <script src="menu.js"></script>
-    <script src="script.js"></script>
+    <script src="supplier.js"></script>
 </body>
 </html>

@@ -1,19 +1,13 @@
-// =============================================
-// KONFIGURASI FIREBASE - ISI DENGAN DATA ANDA
-// =============================================
 const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyDtb1r_QrrmkSxXPANzOPTB4Pkk-PGea9c", // Ganti dengan API Key Anda
-    projectId: "crudmaster-61ff9",                      // Ganti dengan Project ID Anda
+    apiKey: "AIzaSyDtb1r_QrrmkSxXPANzOPTB4Pkk-PGea9c",
+    projectId: "crudmaster-61ff9",
 };
-// =============================================
 
-// Variabel global
 let db;
 let barangCollection;
 let stockChart = null;
 let topStockChart = null;
 
-// Elemen DOM
 const totalBarangElement = document.getElementById('totalBarang');
 const totalStockElement = document.getElementById('totalStock');
 const barangMinimumElement = document.getElementById('barangMinimum');
@@ -25,29 +19,6 @@ const filterSatuan = document.getElementById('filterSatuan');
 const btnApplyFilter = document.getElementById('btnApplyFilter');
 const btnResetFilter = document.getElementById('btnResetFilter');
 
-// Menu Button
-const menuToggle = document.getElementById('menuToggle');
-const dropdownMenu = document.getElementById('dropdownMenu');
-
-// Toggle dropdown menu
-if (menuToggle && dropdownMenu) {
-    menuToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdownMenu.classList.toggle('show');
-    });
-    
-    // Tutup dropdown saat klik di luar
-    document.addEventListener('click', () => {
-        dropdownMenu.classList.remove('show');
-    });
-    
-    // Jangan tutup dropdown saat klik di dalam
-    dropdownMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
-}
-
-// Fungsi untuk memperbarui konfigurasi otomatis
 function updateFirebaseConfig() {
     if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.includes("xxxx")) {
         console.error("API Key belum diisi dengan benar");
@@ -59,7 +30,6 @@ function updateFirebaseConfig() {
         return false;
     }
     
-    // Update konfigurasi lainnya secara otomatis
     FIREBASE_CONFIG.authDomain = `${FIREBASE_CONFIG.projectId}.firebaseapp.com`;
     FIREBASE_CONFIG.storageBucket = `${FIREBASE_CONFIG.projectId}.appspot.com`;
     FIREBASE_CONFIG.messagingSenderId = "000000000000";
@@ -68,7 +38,6 @@ function updateFirebaseConfig() {
     return true;
 }
 
-// Format ke Rupiah
 function formatRupiah(angka) {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -77,21 +46,17 @@ function formatRupiah(angka) {
     }).format(angka);
 }
 
-// Inisialisasi Firebase
 function initializeFirebase() {
     try {
-        // Perbarui konfigurasi otomatis
         if (!updateFirebaseConfig()) {
             console.error("Konfigurasi Firebase tidak valid");
             return;
         }
         
-        // Initialize Firebase
         const app = firebase.initializeApp(FIREBASE_CONFIG);
         db = firebase.firestore(app);
         barangCollection = db.collection('barang');
         
-        // Muat data statistik
         loadAnalyticData();
         
     } catch (error) {
@@ -99,7 +64,6 @@ function initializeFirebase() {
     }
 }
 
-// Muat data statistik
 async function loadAnalyticData() {
     try {
         const snapshot = await barangCollection.get();
@@ -120,27 +84,18 @@ async function loadAnalyticData() {
                 ...data
             });
             
-            // Kumpulkan lokasi unik
             if (data.lokasi) {
                 lokasiSet.add(data.lokasi);
             }
             
-            // Kumpulkan satuan unik
             if (data.satuan) {
                 satuanSet.add(data.satuan);
             }
         });
         
-        // Isi filter dropdown
         populateFilterOptions(lokasiSet, satuanSet);
-        
-        // Hitung statistik
         calculateStatistics(barangData);
-        
-        // Buat grafik
         createCharts(barangData);
-        
-        // Tampilkan tabel
         populateTables(barangData);
         
     } catch (error) {
@@ -148,13 +103,10 @@ async function loadAnalyticData() {
     }
 }
 
-// Isi opsi filter
 function populateFilterOptions(lokasiSet, satuanSet) {
-    // Kosongkan dropdown terlebih dahulu
     filterLokasi.innerHTML = '<option value="">Semua Lokasi</option>';
     filterSatuan.innerHTML = '<option value="">Semua Satuan</option>';
     
-    // Tambahkan opsi lokasi
     lokasiSet.forEach(lokasi => {
         if (lokasi && lokasi.trim() !== '') {
             const option = document.createElement('option');
@@ -164,7 +116,6 @@ function populateFilterOptions(lokasiSet, satuanSet) {
         }
     });
     
-    // Tambahkan opsi satuan
     satuanSet.forEach(satuan => {
         if (satuan && satuan.trim() !== '') {
             const option = document.createElement('option');
@@ -175,14 +126,12 @@ function populateFilterOptions(lokasiSet, satuanSet) {
     });
 }
 
-// Hitung statistik
 function calculateStatistics(barangData) {
     let totalBarang = barangData.length;
     let totalStock = 0;
     let totalNilai = 0;
     let barangMinimum = 0;
     
-    // Batas minimum stock (contoh: 10)
     const MIN_STOCK_THRESHOLD = 10;
     
     barangData.forEach(barang => {
@@ -197,16 +146,13 @@ function calculateStatistics(barangData) {
         }
     });
     
-    // Update elemen statistik
     totalBarangElement.textContent = totalBarang;
     totalStockElement.textContent = totalStock.toLocaleString('id-ID');
     barangMinimumElement.textContent = barangMinimum;
     totalNilaiElement.textContent = formatRupiah(totalNilai);
 }
 
-// Buat grafik
 function createCharts(barangData) {
-    // Hancurkan chart sebelumnya jika ada
     if (stockChart) {
         stockChart.destroy();
     }
@@ -214,7 +160,6 @@ function createCharts(barangData) {
         topStockChart.destroy();
     }
     
-    // 1. Grafik distribusi stock per lokasi
     const stockByLocation = {};
     barangData.forEach(barang => {
         const lokasi = barang.lokasi || 'Tidak Diketahui';
@@ -229,7 +174,6 @@ function createCharts(barangData) {
     const locationLabels = Object.keys(stockByLocation);
     const locationData = Object.values(stockByLocation);
     
-    // Warna untuk chart
     const backgroundColors = [
         '#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6',
         '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#d35400'
@@ -267,7 +211,6 @@ function createCharts(barangData) {
         }
     });
     
-    // 2. Grafik 10 barang dengan stock terbanyak
     const sortedByStock = [...barangData]
         .sort((a, b) => (parseInt(b.stock) || 0) - (parseInt(a.stock) || 0))
         .slice(0, 10);
@@ -313,9 +256,7 @@ function createCharts(barangData) {
     });
 }
 
-// Tampilkan tabel
 function populateTables(barangData) {
-    // 1. Tabel barang dengan stock minimum (kurang dari 10)
     const MIN_STOCK_THRESHOLD = 10;
     const minStockItems = barangData
         .filter(barang => (parseInt(barang.stock) || 0) < MIN_STOCK_THRESHOLD)
@@ -360,7 +301,6 @@ function populateTables(barangData) {
         });
     }
     
-    // 2. Tabel barang dengan nilai tertinggi (stock * harga)
     const highValueItems = [...barangData]
         .map(barang => ({
             ...barang,
@@ -394,7 +334,6 @@ function populateTables(barangData) {
     }
 }
 
-// Terapkan filter
 btnApplyFilter.addEventListener('click', async () => {
     const selectedLokasi = filterLokasi.value;
     const selectedSatuan = filterSatuan.value;
@@ -402,7 +341,6 @@ btnApplyFilter.addEventListener('click', async () => {
     try {
         let query = barangCollection;
         
-        // Terapkan filter jika ada
         if (selectedLokasi) {
             query = query.where('lokasi', '==', selectedLokasi);
         }
@@ -426,13 +364,8 @@ btnApplyFilter.addEventListener('click', async () => {
             });
         });
         
-        // Hitung ulang statistik dengan data terfilter
         calculateStatistics(filteredData);
-        
-        // Buat ulang grafik dengan data terfilter
         createCharts(filteredData);
-        
-        // Tampilkan ulang tabel dengan data terfilter
         populateTables(filteredData);
         
     } catch (error) {
@@ -440,27 +373,12 @@ btnApplyFilter.addEventListener('click', async () => {
     }
 });
 
-// Reset filter
 btnResetFilter.addEventListener('click', () => {
     filterLokasi.value = '';
     filterSatuan.value = '';
-    
-    // Muat ulang semua data
     loadAnalyticData();
 });
 
-// Inisialisasi saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
-    // Inisialisasi Firebase
     initializeFirebase();
-    
-    // Tambahkan CSS untuk status
-    const style = document.createElement('style');
-    style.textContent = `
-        .status-aman { color: #2ecc71; font-weight: bold; }
-        .status-rendah { color: #f39c12; font-weight: bold; }
-        .status-kritis { color: #e74c3c; font-weight: bold; }
-        .status-habis { color: #7f8c8d; font-weight: bold; }
-    `;
-    document.head.appendChild(style);
 });

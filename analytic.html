@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Statistik Barang</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="analytic.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Menu Button di kiri atas -->
     <div class="menu-button">
         <button id="menuToggle">
             <i class="fas fa-bars"></i> Menu
@@ -19,6 +18,18 @@
         <div class="dropdown-menu" id="dropdownMenu">
             <a href="index.html">
                 <i class="fas fa-boxes"></i> Master Barang
+            </a>
+            <a href="supplier.html">
+                <i class="fas fa-truck"></i> Master Supplier
+            </a>
+            <a href="transaksi.html">
+                <i class="fas fa-exchange-alt"></i> Transaksi
+            </a>
+            <a href="kartu-hutang.html">
+                <i class="fas fa-file-invoice-dollar"></i> Kartu Hutang
+            </a>
+            <a href="rekap-hutang.html">
+                <i class="fas fa-chart-pie"></i> Rekap Hutang
             </a>
             <a href="analytic.html" class="active">
                 <i class="fas fa-chart-bar"></i> Statistik Barang
@@ -32,7 +43,6 @@
         </header>
         
         <div class="analytic-container">
-            <!-- Statistik Ringkasan -->
             <div class="summary-cards">
                 <div class="card">
                     <div class="card-icon" style="background-color: #3498db;">
@@ -75,7 +85,6 @@
                 </div>
             </div>
             
-            <!-- Grafik dan Tabel -->
             <div class="analytic-content">
                 <div class="chart-section">
                     <div class="chart-container">
@@ -102,9 +111,7 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="minStockBody">
-                                <!-- Data akan dimuat di sini -->
-                            </tbody>
+                            <tbody id="minStockBody"></tbody>
                         </table>
                     </div>
                     
@@ -120,22 +127,18 @@
                                     <th>Total Nilai</th>
                                 </tr>
                             </thead>
-                            <tbody id="highValueBody">
-                                <!-- Data akan dimuat di sini -->
-                            </tbody>
+                            <tbody id="highValueBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
             
-            <!-- Filter dan Kontrol -->
             <div class="filter-section">
                 <div class="filter-row">
                     <div class="filter-group">
                         <label for="filterLokasi">Filter Berdasarkan Lokasi:</label>
                         <select id="filterLokasi">
                             <option value="">Semua Lokasi</option>
-                            <!-- Opsi lokasi akan diisi oleh JavaScript -->
                         </select>
                     </div>
                     
@@ -143,7 +146,6 @@
                         <label for="filterSatuan">Filter Berdasarkan Satuan:</label>
                         <select id="filterSatuan">
                             <option value="">Semua Satuan</option>
-                            <!-- Opsi satuan akan diisi oleh JavaScript -->
                         </select>
                     </div>
                     
@@ -160,6 +162,7 @@
         </div>
     </div>
 
+    <script src="menu.js"></script>
     <script src="analytic.js"></script>
 </body>
 </html>
