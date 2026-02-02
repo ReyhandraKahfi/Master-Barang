@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Transaksi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="MasterTransaksi.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="menu-button">
+        <button id="menuToggle">
+            <i class="fas fa-bars"></i> Menu
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="index.html">
+                <i class="fas fa-boxes"></i> Master Barang
+            </a>
+            <a href="supplier.html">
+                <i class="fas fa-truck"></i> Master Supplier
+            </a>
+            <a href="transaksi.html">
+                <i class="fas fa-exchange-alt"></i> Transaksi Pembelian
+            </a>
+            <a href="MasterTransaksi.html" id="menuMasterTransaksi">
+                <i class="fas fa-list"></i> Master Transaksi
+            </a>
+            <a href="kartu-hutang.html">
+                <i class="fas fa-file-invoice-dollar"></i> Kartu Hutang
+            </a>
+            <a href="rekap-hutang.html">
+                <i class="fas fa-chart-pie"></i> Rekap Hutang
+            </a>
+            <a href="analytic.html">
+                <i class="fas fa-chart-bar"></i> Statistik Barang
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-list"></i> Master Transaksi Pembelian</h1>
+            <p class="subtitle">Kelola semua transaksi pembelian barang</p>
+        </header>
+        
+        <div class="filter-section">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="filterTanggalDari">Tanggal Dari</label>
+                    <input type="date" id="filterTanggalDari">
+                </div>
+                <div class="filter-group">
+                    <label for="filterTanggalSampai">Tanggal Sampai</label>
+                    <input type="date" id="filterTanggalSampai">
+                </div>
+                <div class="filter-group">
+                    <label for="filterSupplier">Supplier</label>
+                    <select id="filterSupplier">
+                        <option value="">Semua Supplier</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterSearch">Cari No. Faktur</label>
+                    <input type="text" id="filterSearch" placeholder="Masukkan nomor faktur...">
+                </div>
+            </div>
+            
+            <div class="btn-container" style="margin-top: 15px;">
+                <button class="btn btn-reset" id="btnResetFilter">
+                    <i class="fas fa-redo"></i> Reset Filter
+                </button>
+            </div>
+        </div>
+        
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-icon" style="background-color: #3498db;">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Total Transaksi</h3>
+                    <p id="totalTransaksi">0</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background-color: #2ecc71;">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Total Pembelian</h3>
+                    <p id="totalPembelian">Rp 0</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background-color: #f39c12;">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Total Barang</h3>
+                    <p id="totalBarang">0</p>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background-color: #9b59b6;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Total Supplier</h3>
+                    <p id="totalSupplier">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Daftar Transaksi Pembelian</h3>
+                <button class="btn btn-refresh" id="btnRefresh">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="loading" id="loadingIndicator">
+                <i class="fas fa-spinner fa-spin"></i> Memuat data...
+            </div>
+            
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-database"></i>
+                <p>Tidak ada data transaksi ditemukan</p>
+            </div>
+            
+            <div class="error" id="errorState" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p id="errorMessage">Terjadi kesalahan saat memuat data</p>
+            </div>
+            
+            <table id="tableMasterTransaksi" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Tanggal</th>
+                        <th>No. Faktur</th>
+                        <th>Supplier</th>
+                        <th>Jumlah Item</th>
+                        <th>Total DPP</th>
+                        <th>PPN</th>
+                        <th>Grand Total</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableMasterTransaksiBody"></tbody>
+            </table>
+            
+            <div class="pagination" id="pagination" style="display: none;">
+                <button class="btn-pagination" id="btnPrev" disabled>
+                    <i class="fas fa-chevron-left"></i> Sebelumnya
+                </button>
+                <span id="pageInfo">Halaman 1 dari 1</span>
+                <button class="btn-pagination" id="btnNext" disabled>
+                    Berikutnya <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detail Transaksi -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-invoice"></i> Detail Transaksi Pembelian</h3>
+                <button class="btn-close" id="btnCloseDetail">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-header">
+                    <div class="detail-info">
+                        <div class="info-row">
+                            <span class="info-label">No. Faktur:</span>
+                            <span class="info-value" id="detailNoFaktur">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Tanggal:</span>
+                            <span class="info-value" id="detailTanggal">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Supplier:</span>
+                            <span class="info-value" id="detailSupplier">-</span>
+                        </div>
+                    </div>
+                    <div class="detail-summary">
+                        <div class="summary-item">
+                            <span>Total DPP:</span>
+                            <strong id="detailTotalDPP">Rp 0</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>PPN (11%):</span>
+                            <strong id="detailTotalPPN">Rp 0</strong>
+                        </div>
+                        <div class="summary-item grand-total">
+                            <span>Grand Total:</span>
+                            <strong id="detailGrandTotal">Rp 0</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-items">
+                    <h4><i class="fas fa-boxes"></i> Detail Barang</h4>
+                    <table id="detailItemsTable">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Barang</th>
+                                <th>Qty</th>
+                                <th>Harga Satuan</th>
+                                <th>DPP</th>
+                                <th>PPN</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailItemsBody"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" style="text-align: right; font-weight: bold;">Total:</td>
+                                <td class="number-cell" id="detailFooterDPP">Rp 0</td>
+                                <td class="number-cell" id="detailFooterPPN">Rp 0</td>
+                                <td class="number-cell" id="detailFooterTotal">Rp 0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCloseModalDetail">
+                    <i class="fas fa-times"></i> Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit -->
+    <div class="modal" id="editModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Edit Transaksi</h3>
+                <button class="btn-close" id="btnCloseEdit">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editNoFaktur">No. Faktur *</label>
+                        <input type="text" id="editNoFaktur" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTanggal">Tanggal Transaksi *</label>
+                        <input type="datetime-local" id="editTanggal" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editSupplier">Supplier *</label>
+                    <select id="editSupplier" required>
+                        <option value="">Pilih Supplier</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Items Pembelian</label>
+                    <div class="edit-items-container" id="editItemsContainer">
+                        <!-- Items akan ditambahkan secara dinamis -->
+                    </div>
+                    <button type="button" class="btn btn-small btn-tambah" id="btnTambahItemEdit">
+                        <i class="fas fa-plus"></i> Tambah Item
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelEdit">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+                <button class="btn btn-primary" id="btnSaveEdit">
+                    <i class="fas fa-save"></i> Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Konfirmasi Hapus</h3>
+                <button class="btn-close" id="btnCloseDelete">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p id="deleteMessage">Apakah Anda yakin ingin menghapus transaksi ini?</p>
+                    <p class="warning-note">
+                        <strong>Peringatan:</strong> Menghapus transaksi akan mengurangi stock barang yang terkait.
+                        Tindakan ini tidak dapat dibatalkan.
+                    </p>
+                </div>
+                <div class="delete-details">
+                    <div class="info-row">
+                        <span class="info-label">No. Faktur:</span>
+                        <span class="info-value" id="deleteNoFaktur">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Supplier:</span>
+                        <span class="info-value" id="deleteSupplier">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Grand Total:</span>
+                        <span class="info-value" id="deleteGrandTotal">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelDelete">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+                <button class="btn btn-danger" id="btnConfirmDelete">
+                    <i class="fas fa-trash"></i> Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+
+    <script src="menu.js"></script>
+    <script src="MasterTransaksi.js"></script>
+</body>
+</html>
