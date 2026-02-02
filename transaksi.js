@@ -35,6 +35,9 @@ const selectedTanggal = document.getElementById('selectedTanggal');
 const displayGrandTotal = document.getElementById('displayGrandTotal');
 const statusMessage = document.getElementById('statusMessage');
 
+// Buat modal konfirmasi
+let confirmationModal;
+
 function initializeFirebase() {
     try {
         const app = firebase.initializeApp(FIREBASE_CONFIG);
@@ -43,12 +46,85 @@ function initializeFirebase() {
         barangCollection = db.collection('barang');
         supplierCollection = db.collection('supplier');
         
+        createConfirmationModal();
         loadSuppliers();
         loadBarang();
         setupDate();
     } catch (error) {
         console.error("Error initializing Firebase:", error);
     }
+}
+
+function createConfirmationModal() {
+    // Buat modal HTML
+    confirmationModal = document.createElement('div');
+    confirmationModal.className = 'modal';
+    confirmationModal.id = 'confirmationModal';
+    confirmationModal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <h3><i class="fas fa-exclamation-triangle"></i> Konfirmasi Transaksi</h3>
+            <div id="modalMessage" style="margin: 15px 0; line-height: 1.6;">
+                Apakah Anda yakin ingin menyimpan transaksi ini dan memperbarui stock barang?
+            </div>
+            <div id="stockUpdateDetails" style="margin: 15px 0; padding: 10px; background-color: #f8f9fa; border-radius: 4px; font-size: 14px;">
+                <p style="margin-bottom: 8px; font-weight: bold;">Detail Update Stock:</p>
+                <div id="stockItemsList"></div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" id="btnCancelModal">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+                <button class="btn btn-confirm" id="btnConfirmSave">
+                    <i class="fas fa-check"></i> Ya, Simpan
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(confirmationModal);
+    
+    // Setup event listeners untuk modal
+    document.getElementById('btnCancelModal').addEventListener('click', () => {
+        confirmationModal.style.display = 'none';
+    });
+    
+    document.getElementById('btnConfirmSave').addEventListener('click', () => {
+        confirmationModal.style.display = 'none';
+        saveTransaction();
+    });
+    
+    // Tutup modal saat klik di luar
+    confirmationModal.addEventListener('click', (e) => {
+        if (e.target === confirmationModal) {
+            confirmationModal.style.display = 'none';
+        }
+    });
+}
+
+function showConfirmationModal() {
+    // Isi detail stock yang akan diupdate
+    const stockItemsList = document.getElementById('stockItemsList');
+    stockItemsList.innerHTML = '';
+    
+    if (selectedItems.length === 0) {
+        stockItemsList.innerHTML = '<p style="color: #666;">Tidak ada item untuk diupdate.</p>';
+    } else {
+        selectedItems.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.style.padding = '5px 0';
+            itemDiv.style.borderBottom = '1px solid #eee';
+            itemDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between;">
+                    <span>${item.barangText}</span>
+                    <span><strong>+${item.qty}</strong> unit</span>
+                </div>
+            `;
+            stockItemsList.appendChild(itemDiv);
+        });
+    }
+    
+    // Tampilkan modal
+    confirmationModal.style.display = 'flex';
 }
 
 function setupDate() {
@@ -103,13 +179,23 @@ async function loadBarang() {
             option.value = doc.id;
             option.textContent = `${barang.kodeBarang} - ${barang.namaBarang}`;
             option.setAttribute('data-harga', barang.hargaBeli || 0);
+            option.setAttribute('data-stock', barang.stock || 0);
+            option.setAttribute('data-satuan', barang.satuan || '');
             barangSelect.appendChild(option);
         });
         
         barangSelect.addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             const harga = selectedOption.getAttribute('data-harga') || 0;
+            const stock = selectedOption.getAttribute('data-stock') || 0;
+            const satuan = selectedOption.getAttribute('data-satuan') || '';
+            
             hargaInput.value = formatNumber(String(harga));
+            
+            // Tampilkan info stock
+            if (stock !== undefined) {
+                showStatus(`Stock tersedia: ${stock} ${satuan}`, 'success');
+            }
         });
         
     } catch (error) {
@@ -169,25 +255,42 @@ btnTambahItem.addEventListener('click', () => {
         return;
     }
     
-    const dpp = qty * harga;
-    const ppn = dpp * 0.11;
-    const total = dpp + ppn;
+    // Cek apakah barang sudah ada di daftar
+    const existingItemIndex = selectedItems.findIndex(item => item.barangId === barangId);
+    if (existingItemIndex !== -1) {
+        // Update quantity jika barang sudah ada
+        selectedItems[existingItemIndex].qty += qty;
+        const updatedDPP = selectedItems[existingItemIndex].qty * selectedItems[existingItemIndex].harga;
+        const updatedPPN = updatedDPP * 0.11;
+        const updatedTotal = updatedDPP + updatedPPN;
+        
+        selectedItems[existingItemIndex].dpp = updatedDPP;
+        selectedItems[existingItemIndex].ppn = updatedPPN;
+        selectedItems[existingItemIndex].total = updatedTotal;
+    } else {
+        // Tambah barang baru
+        const dpp = qty * harga;
+        const ppn = dpp * 0.11;
+        const total = dpp + ppn;
+        
+        const item = {
+            id: Date.now(),
+            barangId: barangId,
+            barangText: barangText,
+            qty: qty,
+            harga: harga,
+            dpp: dpp,
+            ppn: ppn,
+            total: total
+        };
+        
+        selectedItems.push(item);
+    }
     
-    const item = {
-        id: Date.now(),
-        barangId: barangId,
-        barangText: barangText,
-        qty: qty,
-        harga: harga,
-        dpp: dpp,
-        ppn: ppn,
-        total: total
-    };
-    
-    selectedItems.push(item);
     renderItems();
     calculateTotals();
     
+    // Reset input
     qtyInput.value = 1;
     hargaInput.value = '';
     barangSelect.value = '';
@@ -254,6 +357,36 @@ function calculateTotals() {
     currentTransaksi.grandTotal = grandTotalValue;
 }
 
+// Fungsi untuk update stock barang
+async function updateBarangStock(barangId, qty) {
+    try {
+        const barangRef = barangCollection.doc(barangId);
+        const barangDoc = await barangRef.get();
+        
+        if (!barangDoc.exists) {
+            console.error(`Barang dengan ID ${barangId} tidak ditemukan`);
+            return false;
+        }
+        
+        const barangData = barangDoc.data();
+        const currentStock = barangData.stock || 0;
+        const newStock = currentStock + qty;
+        
+        // Update stock di database
+        await barangRef.update({
+            stock: newStock,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log(`Stock barang ${barangData.namaBarang} berhasil diupdate: ${currentStock} + ${qty} = ${newStock}`);
+        return true;
+        
+    } catch (error) {
+        console.error(`Error updating stock for barang ${barangId}:`, error);
+        return false;
+    }
+}
+
 btnSimpanTransaksi.addEventListener('click', async () => {
     if (!supplierSelect.value) {
         showStatus('Pilih supplier terlebih dahulu.', 'error');
@@ -265,12 +398,26 @@ btnSimpanTransaksi.addEventListener('click', async () => {
         return;
     }
     
+    // Tampilkan modal konfirmasi (popup)
+    showConfirmationModal();
+});
+
+// Fungsi untuk menyimpan transaksi (dipanggil dari modal)
+async function saveTransaction() {
     const transaksiData = {
         tanggal: tanggalInput.value,
         supplierId: supplierSelect.value,
         supplierName: supplierSelect.options[supplierSelect.selectedIndex].text,
         noFaktur: noFakturInput.value.trim(),
-        items: selectedItems,
+        items: selectedItems.map(item => ({
+            barangId: item.barangId,
+            barangText: item.barangText,
+            qty: item.qty,
+            harga: item.harga,
+            dpp: item.dpp,
+            ppn: item.ppn,
+            total: item.total
+        })),
         totalDPP: currentTransaksi.totalDPP,
         totalPPN: currentTransaksi.totalPPN,
         grandTotal: currentTransaksi.grandTotal,
@@ -280,19 +427,58 @@ btnSimpanTransaksi.addEventListener('click', async () => {
     };
     
     try {
-        await transaksiCollection.add(transaksiData);
+        // Mulai batch transaction
+        const batch = db.batch();
         
-        // SALDO AWAL SUPPLIER TIDAK DIUPDATE DI SINI!
-        // Saldo akan dihitung otomatis di kartu hutang
+        // Simpan transaksi
+        const transaksiRef = transaksiCollection.doc();
+        batch.set(transaksiRef, transaksiData);
         
-        showStatus('Transaksi berhasil disimpan!', 'success');
+        // Update stock untuk setiap barang yang dibeli
+        const stockUpdates = [];
+        for (const item of selectedItems) {
+            const barangRef = barangCollection.doc(item.barangId);
+            const barangDoc = await barangRef.get();
+            
+            if (barangDoc.exists) {
+                const barangData = barangDoc.data();
+                const currentStock = barangData.stock || 0;
+                const newStock = currentStock + item.qty;
+                
+                batch.update(barangRef, {
+                    stock: newStock,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                stockUpdates.push({
+                    namaBarang: barangData.namaBarang,
+                    qty: item.qty,
+                    from: currentStock,
+                    to: newStock
+                });
+            }
+        }
+        
+        // Commit batch transaction
+        await batch.commit();
+        
+        // Tampilkan status sukses
+        showStatus('Transaksi berhasil disimpan dan stock barang diperbarui!', 'success');
+        
+        // Tampilkan detail update stock di console
+        console.log('=== STOCK BARANG DIUPDATE ===');
+        stockUpdates.forEach(update => {
+            console.log(`${update.namaBarang}: ${update.from} + ${update.qty} = ${update.to}`);
+        });
+        console.log('==========================');
+        
         resetTransaksi();
         
     } catch (error) {
         console.error("Error saving transaction:", error);
         showStatus('Gagal menyimpan transaksi.', 'error');
     }
-});
+}
 
 btnReset.addEventListener('click', resetTransaksi);
 

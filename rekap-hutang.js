@@ -1,4 +1,4 @@
-// rekap-hutang.js - Tanpa kolom STATUS dan tanpa rumus perhitungan
+// rekap-hutang.js - Tanpa bagian informasi tambahan di bawah tabel
 const FIREBASE_CONFIG = {
     apiKey: "AIzaSyDtb1r_QrrmkSxXPANzOPTB4Pkk-PGea9c",
     projectId: "crudmaster-61ff9",
@@ -76,16 +76,21 @@ async function generateRekap() {
         
         if (supplierSnapshot.empty) {
             console.log("Tidak ada data supplier");
-            updateSummary([], 0, 0, 0);
+            updateSummary(0, 0, 0, 0, 0);
             excelContainer.innerHTML = '<div class="empty-state">Tidak ada data supplier.</div>';
             return;
         }
+        
+        const selectedDate = new Date(rekapDate.value);
+        const firstDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+        const lastDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
         
         // Inisialisasi total
         let totalSupplierCount = 0;
         let totalTransaksiCount = 0;
         let totalLunasCount = 0;
         let totalHutangValue = 0;
+        let grandTotalSaldoAkhir = 0;
         
         const supplierData = [];
         
@@ -133,6 +138,20 @@ async function generateRekap() {
             const saldoAwalSupplier = supplier.saldoAwal || 0;
             const saldoAkhirSupplier = saldoAwalSupplier - totalPembelianSupplier + totalPelunasanSupplier;
             
+            // PERHITUNGAN TOTAL HUTANG YANG BENAR:
+            // Hutang hanya dihitung jika saldo akhir NEGATIF
+            if (saldoAkhirSupplier < 0) {
+                totalHutangValue += Math.abs(saldoAkhirSupplier); // Gunakan nilai absolut
+            }
+            
+            // Hitung supplier yang LUNAS (saldo akhir >= 0)
+            if (saldoAkhirSupplier >= 0) {
+                totalLunasCount++;
+            }
+            
+            // Akumulasi grand total saldo akhir (bisa positif atau negatif)
+            grandTotalSaldoAkhir += saldoAkhirSupplier;
+            
             // Tambahkan ke array supplier data (TANPA STATUS)
             supplierData.push({
                 id: supplierId,
@@ -150,11 +169,11 @@ async function generateRekap() {
             totalTransaksiCount += transaksiCount;
         }
         
-        // Update summary
+        // Update summary dengan total hutang yang benar
         updateSummary(totalSupplierCount, totalHutangValue, totalTransaksiCount, totalLunasCount);
         
         // Buat tabel rekap Excel-like
-        createRekapExcelTable(supplierData);
+        createRekapExcelTable(supplierData, grandTotalSaldoAkhir, totalHutangValue);
         
     } catch (error) {
         console.error("Error generating rekap:", error);
@@ -169,7 +188,7 @@ function updateSummary(supplierCount, totalHutangValue, transaksiCount, lunasCou
     totalLunas.textContent = lunasCount;
 }
 
-function createRekapExcelTable(supplierData) {
+function createRekapExcelTable(supplierData, grandTotalSaldoAkhir, totalHutangValue) {
     excelContainer.innerHTML = '';
     
     if (supplierData.length === 0) {
@@ -186,7 +205,8 @@ function createRekapExcelTable(supplierData) {
     let grandTotalPPN = 0;
     let grandTotalPembelian = 0;
     let grandTotalPelunasan = 0;
-    let grandTotalSaldoAkhir = 0;
+    // grandTotalSaldoAkhir sudah dihitung di generateRekap()
+    // totalHutangValue sudah dihitung di generateRekap()
     
     supplierData.forEach(supplier => {
         grandTotalSaldoAwal += supplier.saldoAwal;
@@ -194,7 +214,6 @@ function createRekapExcelTable(supplierData) {
         grandTotalPPN += supplier.ppn;
         grandTotalPembelian += supplier.pembelian;
         grandTotalPelunasan += supplier.pelunasan;
-        grandTotalSaldoAkhir += supplier.saldoAkhir;
     });
     
     // Buat container untuk rekap
@@ -276,7 +295,8 @@ function createRekapExcelTable(supplierData) {
         rekapBody.appendChild(row);
     });
     
-    // HAPUS RUMUS PERHITUNGAN (tidak ada notes row lagi)
+    // HAPUS BAGIAN INFORMASI TAMBAHAN DI BAWAH TABEL
+    // Tidak ada lagi .summary-info div
     
     container.appendChild(header);
     container.appendChild(table);
@@ -494,7 +514,7 @@ function printReport() {
 
 // Tambahkan style untuk status di CSS
 document.addEventListener('DOMContentLoaded', () => {
-    // Tambahkan style dinamis
+    // Hapus style untuk .summary-info
     const style = document.createElement('style');
     style.textContent = `
         .saldo-positif {
